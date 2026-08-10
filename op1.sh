@@ -19,4 +19,7 @@
 #echo 'src-git openclash https://github.com/vernesong/OpenClash' >>feeds.conf.default
 #echo 'src-git passwall2 https://github.com/xiaorouji/openwrt-passwall2.git;main' >>feeds.conf.default
 #echo 'src-git passwall https://github.com/xiaorouji/openwrt-passwall.git;main' >>feeds.conf.default
-echo 'net.netfilter.nf_conntrack_max=65535' >>package/kernel/linux/files/sysctl-nf-conntrack.conf
+#echo 'net.netfilter.nf_conntrack_max=65535' >>package/kernel/linux/files/sysctl-nf-conntrack.conf
+
+# 仅保留常用的LUCI和网络插件，移除 passwall、openclash 等第三方 feeds[cite: 1, 2]
+echo 'net.netfilter.nf_conntrack_max=65535' >> package/kernel/linux/files/sysctl-nf-conntrack.conf
