@@ -12,4 +12,11 @@
 
 # Modify default IP
 #=================================================
-sed -i "s/192.168.1.1/10.0.0.2/" package/base-files/files/bin/config_generate
+#sed -i "s/192.168.1.1/10.0.0.2/" package/base-files/files/bin/config_generate
+
+
+# 修改默认 IP 为 192.168.50.235[cite: 1, 3]
+sed -i "s/192.168.1.1/192.168.50.235/g" package/base-files/files/bin/config_generate
+
+# 设置登录密码为空
+sed -i 's/root:::0:99999:7:::/root::0:0:99999:7:::/g' package/base-files/files/etc/shadow
