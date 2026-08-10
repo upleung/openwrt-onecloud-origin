@@ -10,9 +10,11 @@
 # Description: OpenWrt DIY script part 2 (rm Update feeds)
 #
 
+# 移除所有第三方代理工具的克隆与安装逻辑，确保固件纯净[cite: 1, 4]
+# (保留空脚本或仅在此添加日后必要的纯净版补丁)
 #=================================================
-sudo rm -rf feeds/packages/net/sing-box
-git clone https://github.com/orgx2812/sing-box feeds/packages/net/sing-box
+#sudo rm -rf feeds/packages/net/sing-box
+#git clone https://github.com/orgx2812/sing-box feeds/packages/net/sing-box
 #sudo rm -rf feeds/packages/net/microsocks
 #sudo rm -rf feeds/packages/net/trojan-go
 #sudo rm -rf feeds/packages/net/v2ray-core
