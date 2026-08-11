@@ -1,4 +1,4 @@
-name: Build OpenWrt and Docker Image
+name: Build OpenWrt and Docker Image Stable version
 
 on:
   workflow_dispatch:
