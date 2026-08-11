@@ -36,6 +36,25 @@
 docker pull mcgtekwrt/openwrt-onecloud:new23.05.6
 ```
 
+### 🐧检查 Docker 网络 (Macvlan)
+
+如原先跑过旧的 OpenWrt 容器，说明 Macvlan 网络已经创建好，用以下命令查看网络名称：
+
+```
+docker network ls
+```
+通常名字叫 macnet 或 macvlan（下面命令以 macnet 为例）。如果没找到，可以重新创建：
+
+```
+# 仅当 docker network ls 中没有 macvlan 网络时执行：（根据自己的网段和默认网关填写）
+
+docker network create -d macvlan \
+  --subnet=192.168.50.0/24 \
+  --gateway=192.168.50.1 \
+  -o parent=eth0 macnet
+```
+
+
 ### 🐧启动运行
 
 - 首次测试
