@@ -1,0 +1,203 @@
+name: Build OpenWrt and Docker Image
+
+on:
+  workflow_dispatch:
+
+env:
+  REPO_URL: https://github.com/openwrt/openwrt
+  REPO_BRANCH: v23.05.6
+  CONFIG_FILE: .config
+  DIY_P1_SH: op1.sh
+  DIY_P2_SH: op2.sh
+  DIY_P3_SH: op3.sh
+  TZ: Asia/Shanghai
+  DOCKER_IMAGE_NAME: mcgtekwrt/openwrt-onecloud
+  GHCR_IMAGE_NAME: ghcr.io/upleung/openwrt-onecloud
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@main
+
+    - name: Initialization environment
+      env:
+        DEBIAN_FRONTEND: noninteractive
+      run: |
+        sudo rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc
+        sudo -E apt-get -qq update
+        sudo -E apt-get -qq install build-essential clang flex bison g++ gawk gcc-multilib g++-multilib gettext libncurses5-dev libssl-dev python3-distutils rsync unzip zlib1g-dev file wget
+        sudo -E apt-get -qq autoremove --purge
+        sudo -E apt-get -qq clean
+        sudo timedatectl set-timezone "$TZ"
+
+    - name: Clone source code
+      run: git clone -b $REPO_BRANCH $REPO_URL openwrt
+
+    - name: Load custom OneCloud amlogic target
+      run: |
+        cd openwrt
+        rm -rf target/linux/amlogic
+        git clone -b lienol-2305 --single-branch https://github.com/upleung/openwrt-onecloud-stable.git temp_repo
+        mv temp_repo/target/linux/amlogic target/linux/amlogic
+        rm -rf temp_repo
+
+    - name: Run DIY part 1 script
+      run: |
+        chmod +x $DIY_P1_SH
+        cd openwrt
+        ../$DIY_P1_SH
+
+    - name: Update and install feeds
+      run: |
+        cd openwrt
+        ./scripts/feeds update -a
+        ./scripts/feeds install -a
+
+    - name: Run DIY part 2 and 3 scripts
+      run: |
+        chmod +x $DIY_P2_SH $DIY_P3_SH
+        cd openwrt
+        ../$DIY_P2_SH
+        ../$DIY_P3_SH
+
+    - name: Load custom configuration
+      run: |
+        [ -e files ] && mv files openwrt/files
+        [ -e $CONFIG_FILE ] && mv $CONFIG_FILE openwrt/.config
+        cd openwrt
+        make defconfig
+
+    - name: Download package
+      run: |
+        cd openwrt
+        make download -j8
+        find dl -size -1024c -exec ls -l {} \;
+        find dl -size -1024c -exec rm -f {} \;
+
+    # ================= 核心编译步骤 =================
+    - name: Compile the firmware
+      run: |
+        cd openwrt
+        echo -e "$(nproc) thread compile"
+        make -j$(nproc) || make -j1 || make -j1 V=s
+
+    # ================= 生成线刷直刷固件 =================
+    - name: Generate direct burn firmware
+      run: |
+          sudo apt install -y android-sdk-libsparse-utils
+          ver="v0.3.1"
+          curl -L -o ./AmlImg https://github.com/lxiaya/AmlImg/releases/download/$ver/AmlImg_${ver}_linux_amd64
+          chmod +x ./AmlImg
+          curl -L -o ./uboot.img https://github.com/lxiaya/u-boot-onecloud/releases/download/build-20230901-0443/eMMC.burn.img
+          ./AmlImg unpack ./uboot.img burn/
+          
+          # 【优化】：只解压 ext4.img.gz 固件，保留 rootfs.tar.gz 供后续 Docker 使用
+          for f in openwrt/bin/targets/*/*/*.img.gz; do
+            [ -f "$f" ] && gunzip "$f"
+          done
+          
+          diskimg=$(ls openwrt/bin/targets/*/*/*.img)
+          if [ -z "$diskimg" ]; then
+             echo "没有找到编译出的 .img 文件！"
+             exit 1
+          fi
+          
+          loop=$(sudo losetup --find --show --partscan $diskimg)
+          boot_img="openwrt_tmp.img"
+          boot_img_mnt="boot_mnt"
+          rootfs_img_mnt="rootfs_mnt"
+          
+          sudo rm -rf ${boot_img} ${boot_img_mnt} ${rootfs_img_mnt}
+          sudo dd if=/dev/zero of=${boot_img} bs=1M count=400
+          sudo mkfs.ext4 ${boot_img}
+          sudo mkdir -p ${boot_img_mnt} ${rootfs_img_mnt}
+          
+          sudo mount ${boot_img} ${boot_img_mnt}
+          sudo mount ${loop}p2 ${rootfs_img_mnt}
+          
+          # 复制 Rootfs 数据
+          sudo cp -r ${rootfs_img_mnt}/* ${boot_img_mnt}/
+          sudo sync
+          
+          sudo umount ${boot_img_mnt}
+          sudo umount ${rootfs_img_mnt}
+          
+          # 转换 SIMG
+          sudo img2simg ${loop}p1 burn/boot.simg
+          sudo img2simg ${boot_img} burn/rootfs.simg
+          
+          # 清理挂载点与零时镜像
+          sudo losetup -d $loop
+          sudo rm -rf ${boot_img} ${boot_img_mnt} ${rootfs_img_mnt}
+          
+          # 生成烧录指令配置
+          cat <<EOF >>burn/commands.txt
+          PARTITION:boot:sparse:boot.simg
+          PARTITION:rootfs:sparse:rootfs.simg
+          EOF
+          
+          # 打包出最终的 .burn.img 刷机包
+          prefix=$(echo $diskimg | sed 's/\.img$//')
+          burnimg=${prefix}.burn.img
+          ./AmlImg pack $burnimg burn/
+          
+          # 压缩与哈希校验
+          for f in openwrt/bin/targets/*/*/*.burn.img; do
+            sha256sum "$f" >"${f}.sha"
+            xz -9 --threads=0 --compress "$f"
+          done
+          
+          # 仅删除无用的原始 img（不影响 rootfs.tar.gz）
+          sudo rm -rf openwrt/bin/targets/*/*/*.img
+
+    - name: Organize firmware files
+      id: organize
+      run: |
+        cd openwrt/bin/targets/*/*
+        rm -rf packages
+        echo "FIRMWARE=$PWD" >> $GITHUB_ENV
+
+    - name: Upload firmware to GitHub Releases
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: "v23.05.6-${{ github.run_number }}"
+        files: ${{ env.FIRMWARE }}/*
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Set up QEMU for Docker
+      uses: docker/setup-qemu-action@v3
+      
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Login to DockerHub
+      uses: docker/login-action@v3
+      with:
+        username: mcgtekwrt
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    - name: Login to GitHub Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: upleung
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Build and Push Docker Image
+      run: |
+        cp docker/Dockerfile ${{ env.FIRMWARE }}/
+        cd ${{ env.FIRMWARE }}
+        
+        docker buildx build --platform linux/arm/v7 \
+          -t ${{ env.DOCKER_IMAGE_NAME }}:stable \
+          -t ${{ env.DOCKER_IMAGE_NAME }}:new23.05.6 \
+          --push .
+          
+        docker buildx build --platform linux/arm/v7 \
+          -t ${{ env.GHCR_IMAGE_NAME }}:stable \
+          -t ${{ env.GHCR_IMAGE_NAME }}:new23.05.6 \
+          --push .
