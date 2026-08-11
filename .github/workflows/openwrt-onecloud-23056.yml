@@ -13,6 +13,9 @@ env:
   TZ: Asia/Shanghai
   DOCKER_IMAGE_NAME: mcgtekwrt/openwrt-onecloud
   GHCR_IMAGE_NAME: ghcr.io/upleung/openwrt-onecloud
+  # 新增的推送仓库环境变量
+  DOCKER_IMAGE_NAME_ARMV7: mcgtekwrt/openwrt-armv7
+  GHCR_IMAGE_NAME_ARMV7: ghcr.io/upleung/openwrt-armv7
 
 jobs:
   build:
@@ -194,12 +197,16 @@ jobs:
         cp docker/Dockerfile ${{ env.FIRMWARE }}/
         cd ${{ env.FIRMWARE }}
         
+        # 推送至 DockerHub (包含原有标签和新增的 armv7:onecloud 标签)
         docker buildx build --platform linux/arm/v7 \
           -t ${{ env.DOCKER_IMAGE_NAME }}:latest \
           -t ${{ env.DOCKER_IMAGE_NAME }}:23.05.6 \
+          -t ${{ env.DOCKER_IMAGE_NAME_ARMV7 }}:onecloud \
           --push .
           
+        # 推送至 GHCR (包含原有标签和新增的 armv7:onecloud 标签)
         docker buildx build --platform linux/arm/v7 \
           -t ${{ env.GHCR_IMAGE_NAME }}:latest \
           -t ${{ env.GHCR_IMAGE_NAME }}:23.05.6 \
+          -t ${{ env.GHCR_IMAGE_NAME_ARMV7 }}:onecloud \
           --push .
