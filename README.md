@@ -56,7 +56,7 @@ mcgtekwrt/openwrt-onecloud:new23.05.6 \
 密码:空
 ```
 
-根据自己的网段修改登录地址:
+根据自己的网段修改登录地址:[更多设置方法](https://github.com/upleung/openwrt-onecloud-origin/blob/main/docs/Change%20login%20address.md)
 
 (如果因为网段不通无法进入后台，可以直接进入容器内部修改网络配置)
 
