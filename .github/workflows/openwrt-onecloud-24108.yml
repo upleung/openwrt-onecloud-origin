@@ -1,4 +1,4 @@
-name: Build OpenWrt and Docker Image Stable version
+name: Build OpenWrt and Docker Image v24.10.8
 
 on:
   workflow_dispatch:
