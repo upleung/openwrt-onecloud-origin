@@ -163,7 +163,7 @@ jobs:
     - name: Upload firmware to GitHub Releases
       uses: softprops/action-gh-release@v1
       with:
-        tag_name: "v23.05.6-${{ github.run_number }}"
+        tag_name: "new23.05.6-${{ github.run_number }}"
         files: ${{ env.FIRMWARE }}/*
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
