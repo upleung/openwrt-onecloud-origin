@@ -1,5 +1,4 @@
-# OpenWrt-OneCloud-Docker版官方原生镜像（未添加第三方插件）
-
+# OpenWrt-OneCloud-Docker版官方原生镜像
 ## 📋 支持的设备
 - ✅ **玩客云S1608**
 
@@ -18,6 +17,11 @@
 - 相关引导:
 
   - [`u-boot`](https://github.com/hzyitc/u-boot-onecloud)
+
+
+- 固件说明:
+
+  - 固件和Docker镜像均为OpenWrt公版，未添加第三方插件，为保持镜像纯净原生体验，可后期通过SSH方式自定义添加插件（如Clash、Xray、Sing-box等）
 
 
 ---
