@@ -38,6 +38,8 @@ docker pull mcgtekwrt/openwrt-onecloud:new23.05.6
 
 ### 🐧启动运行
 
+- 首次测试
+
 ```
 docker run \
 -d \
@@ -48,6 +50,45 @@ docker run \
 mcgtekwrt/openwrt-onecloud:new23.05.6 \
 /sbin/init
 ```
+
+- 数据持久化运行
+
+```
+docker run -d \
+  --name openwrt-test \
+  --network macnet \
+  --privileged \
+  --restart=always \
+  -v /root/openwrt/etc/config:/etc/config \
+  mcgtekwrt/openwrt-onecloud:new23.05.6 \
+  /sbin/init
+```
+
+- 使用 Docker Compose运行（推荐，方便管理）
+
+```
+version: '3.8'
+
+services:
+  openwrt:
+    image: mcgtekwrt/openwrt-onecloud:new23.05.6
+    container_name: openwrt-test
+    privileged: true
+    restart: always
+    command: /sbin/init
+    networks:
+      macnet: {}
+    volumes:
+      # 持久化关键网络和系统配置
+      - ./etc/config:/etc/config
+      # 保留用户密码和账户数据
+      - ./etc/shadow:/etc/shadow
+
+networks:
+  macnet:
+    external: true
+```
+
 
 ### 🐧默认登录地址
 
