@@ -1,4 +1,4 @@
-name: Build OpenWrt and Docker Image Stable version
+name: Build OpenWrt and Docker Image Latest version
 
 on:
   workflow_dispatch:
@@ -165,7 +165,7 @@ jobs:
     - name: Upload firmware to GitHub Releases
       uses: softprops/action-gh-release@v1
       with:
-        tag_name: "new23.05.6-${{ github.run_number }}"
+        tag_name: "23.05.6-${{ github.run_number }}"
         files: ${{ env.FIRMWARE }}/*
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -195,11 +195,11 @@ jobs:
         cd ${{ env.FIRMWARE }}
         
         docker buildx build --platform linux/arm/v7 \
-          -t ${{ env.DOCKER_IMAGE_NAME }}:stable \
-          -t ${{ env.DOCKER_IMAGE_NAME }}:new23.05.6 \
+          -t ${{ env.DOCKER_IMAGE_NAME }}:latest \
+          -t ${{ env.DOCKER_IMAGE_NAME }}:23.05.6 \
           --push .
           
         docker buildx build --platform linux/arm/v7 \
-          -t ${{ env.GHCR_IMAGE_NAME }}:stable \
-          -t ${{ env.GHCR_IMAGE_NAME }}:new23.05.6 \
+          -t ${{ env.GHCR_IMAGE_NAME }}:latest \
+          -t ${{ env.GHCR_IMAGE_NAME }}:23.05.6 \
           --push .
