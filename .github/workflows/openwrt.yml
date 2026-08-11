@@ -5,7 +5,7 @@ on:
 
 env:
   REPO_URL: https://github.com/openwrt/openwrt
-  REPO_BRANCH: openwrt-23.05
+  REPO_BRANCH: v23.05.6  # 锁定为确切的 23.05.6 版本
   CONFIG_FILE: .config
   DIY_P1_SH: op1.sh
   DIY_P2_SH: op2.sh
@@ -33,9 +33,16 @@ jobs:
         sudo -E apt-get -qq clean
         sudo timedatectl set-timezone "$TZ"
 
-
     - name: Clone source code
       run: git clone -b $REPO_BRANCH $REPO_URL openwrt
+
+    - name: Load custom OneCloud amlogic target
+      run: |
+        cd openwrt
+        rm -rf target/linux/amlogic
+        git clone -b lienol-2305 --single-branch https://github.com/upleung/openwrt-onecloud-stable.git temp_repo
+        mv temp_repo/target/linux/amlogic target/linux/amlogic
+        rm -rf temp_repo
 
     - name: Run DIY part 1 script
       run: |
@@ -111,17 +118,14 @@ jobs:
 
     - name: Build and Push Docker Image
       run: |
-        # 复制 rootfs 和 Dockerfile 到构建目录[cite: 1]
         cp docker/Dockerfile ${{ env.FIRMWARE }}/
         cd ${{ env.FIRMWARE }}
         
-        # 推送 mcgtekwrt/openwrt-onecloud (DockerHub)[cite: 1]
         docker buildx build --platform linux/arm/v7 \
           -t ${{ env.DOCKER_IMAGE_NAME }}:latest \
           -t ${{ env.DOCKER_IMAGE_NAME }}:23.05.6 \
           --push .
           
-        # 推送 ghcr.io/upleung/openwrt-onecloud (GitHub Packages)[cite: 1]
         docker buildx build --platform linux/arm/v7 \
           -t ${{ env.GHCR_IMAGE_NAME }}:latest \
           -t ${{ env.GHCR_IMAGE_NAME }}:23.05.6 \
