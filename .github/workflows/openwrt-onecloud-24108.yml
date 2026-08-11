@@ -5,7 +5,7 @@ on:
 
 env:
   REPO_URL: https://github.com/openwrt/openwrt
-  REPO_BRANCH: v23.05.6
+  REPO_BRANCH: v24.10.8
   CONFIG_FILE: .config
   DIY_P1_SH: op1.sh
   DIY_P2_SH: op2.sh
@@ -40,7 +40,7 @@ jobs:
       run: |
         cd openwrt
         rm -rf target/linux/amlogic
-        git clone -b lienol-2305 --single-branch https://github.com/upleung/openwrt-onecloud-stable.git temp_repo
+        git clone -b lienol-2410 --single-branch https://github.com/upleung/openwrt-onecloud-stable.git temp_repo
         mv temp_repo/target/linux/amlogic target/linux/amlogic
         rm -rf temp_repo
 
@@ -165,7 +165,7 @@ jobs:
     - name: Upload firmware to GitHub Releases
       uses: softprops/action-gh-release@v1
       with:
-        tag_name: "new23.05.6-${{ github.run_number }}"
+        tag_name: "24.10.8-${{ github.run_number }}"
         files: ${{ env.FIRMWARE }}/*
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -195,11 +195,9 @@ jobs:
         cd ${{ env.FIRMWARE }}
         
         docker buildx build --platform linux/arm/v7 \
-          -t ${{ env.DOCKER_IMAGE_NAME }}:stable \
-          -t ${{ env.DOCKER_IMAGE_NAME }}:new23.05.6 \
+          -t ${{ env.DOCKER_IMAGE_NAME }}:24.10.8 \
           --push .
           
         docker buildx build --platform linux/arm/v7 \
-          -t ${{ env.GHCR_IMAGE_NAME }}:stable \
-          -t ${{ env.GHCR_IMAGE_NAME }}:new23.05.6 \
+          -t ${{ env.GHCR_IMAGE_NAME }}:24.10.8 \
           --push .
