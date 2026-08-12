@@ -169,6 +169,9 @@ docker ps -a
 #列出本地存储所有的openwrt镜像
 docker images | grep openwrt
 
+#查询真实IP
+docker inspect openwrt-new | grep IPAddress
+
 ```
 
 ### 🐧停用删除镜像
