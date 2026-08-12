@@ -27,7 +27,7 @@
 ---
 
 
-## 💎实测可用，优先使用OpenWrt 23.05.6版本(即latest版)：
+## 💎实测可用，优先使用[OpenWrt 23.05.6](https://hub.docker.com/repository/docker/mcgtekwrt/openwrt-onecloud)版本(即latest版)：
 
 
 ### 🐧拉取镜像
