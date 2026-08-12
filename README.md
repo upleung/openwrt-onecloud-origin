@@ -27,13 +27,13 @@
 ---
 
 
-## 💎Docker正在测试中，优先使用这个版本，实测可用：
+## 💎实测可用，优先使用OpenWrt 23.05.6版本(即latest版)：
 
 
 ### 🐧拉取镜像
 
 ```
-docker pull mcgtekwrt/openwrt-onecloud:new23.05.6
+docker pull mcgtekwrt/openwrt-onecloud:latest
 ```
 
 ### 🐧检查 Docker 网络 (Macvlan)
@@ -66,7 +66,7 @@ docker run \
 --network macnet \
 --privileged \
 --restart=no \
-mcgtekwrt/openwrt-onecloud:new23.05.6 \
+mcgtekwrt/openwrt-onecloud:latest \
 /sbin/init
 ```
 
@@ -79,7 +79,7 @@ docker run -d \
   --privileged \
   --restart=always \
   -v /root/openwrt/etc/config:/etc/config \
-  mcgtekwrt/openwrt-onecloud:new23.05.6 \
+  mcgtekwrt/openwrt-onecloud:latest \
   /sbin/init
 ```
 
@@ -90,7 +90,7 @@ version: '3.8'
 
 services:
   openwrt:
-    image: mcgtekwrt/openwrt-onecloud:new23.05.6
+    image: mcgtekwrt/openwrt-onecloud:latest
     container_name: openwrt-test
     privileged: true
     restart: always
