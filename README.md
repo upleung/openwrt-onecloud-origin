@@ -62,7 +62,7 @@ docker network create -d macvlan \
 ```
 docker run \
 -d \
---name openwrt-test \
+--name openwrt-new \
 --network macnet \
 --privileged \
 --restart=no \
@@ -74,7 +74,7 @@ mcgtekwrt/openwrt-onecloud:latest \
 
 ```
 docker run -d \
-  --name openwrt-test \
+  --name openwrt-new \
   --network macnet \
   --privileged \
   --restart=always \
@@ -91,7 +91,7 @@ version: '3.8'
 services:
   openwrt:
     image: mcgtekwrt/openwrt-onecloud:latest
-    container_name: openwrt-test
+    container_name: openwrt-new
     privileged: true
     restart: always
     command: /sbin/init
@@ -124,7 +124,7 @@ networks:
 ```bash
 #docker exec -it <你的容器名称或ID> sh
 
-docker exec -it openwrt-test sh
+docker exec -it openwrt-new sh
 
 ```
 
@@ -161,7 +161,7 @@ config interface 'lan'
 docker ps -a | grep openwrt
 
 #查看运行LOG运行日志
-docker logs openwrt-test
+docker logs openwrt-new
 
 #列出所有容器（包括已停止的容器）
 docker ps -a
@@ -174,8 +174,8 @@ docker images | grep openwrt
 ### 🐧停用删除
 
 ```
-docker stop openwrt-test
-docker rm openwrt-test
+docker stop openwrt-new
+docker rm openwrt-new
 
 #删除一个或多个镜像
 docker rmi 'CONTAINER ID' or 'IMAGE ID'
