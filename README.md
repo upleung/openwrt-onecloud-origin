@@ -116,7 +116,7 @@ networks:
 密码:空
 ```
 
-根据自己的网段修改登录地址:[更多设置方法](https://github.com/upleung/openwrt-onecloud-origin/blob/main/docs/Change%20login%20address.md)
+根据自己的网段修改登录地址:[更多设置方法](https://github.com/upleung/openwrt-onecloud-origin/blob/main/docs/1.%20%E4%BF%AE%E6%94%B9%E7%99%BB%E5%BD%95%E5%9C%B0%E5%9D%80.md)
 
 (如果因为网段不通无法进入后台，可以直接进入容器内部修改网络配置)
 
