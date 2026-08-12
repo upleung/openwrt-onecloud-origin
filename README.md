@@ -171,7 +171,7 @@ docker images | grep openwrt
 
 ```
 
-### 🐧停用删除
+### 🐧停用删除镜像
 
 ```
 docker stop openwrt-new
@@ -180,3 +180,19 @@ docker rm openwrt-new
 #删除一个或多个镜像
 docker rmi 'CONTAINER ID' or 'IMAGE ID'
 ```
+
+---
+
+### 🔗相关使用指南
+
+[1. 修改登录地址](https://github.com/upleung/openwrt-onecloud-origin/blob/main/docs/1.%20%E4%BF%AE%E6%94%B9%E7%99%BB%E5%BD%95%E5%9C%B0%E5%9D%80.md)
+
+[2. 网络代理和初步设置](https://github.com/upleung/openwrt-onecloud-origin/blob/main/docs/2.%20%E7%BD%91%E7%BB%9C%E4%BB%A3%E7%90%86%E5%92%8C%E5%88%9D%E6%AD%A5%E8%AE%BE%E7%BD%AE.md)
+[]()
+[]()
+[]()
+
+
+
+
+
