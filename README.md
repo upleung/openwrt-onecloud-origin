@@ -1,4 +1,13 @@
 # OpenWrt-OneCloud-Docker版官方原生镜像
+
+<br>
+
+## 🐧为了更好地维护与更新，已迁移至新仓库[OpenWrt-OneCloud-Docker](https://github.com/upleung/OpenWrt-OneCloud-Docker)
+
+<br>
+
+---
+
 ## 📋 支持的设备
 - ✅ **玩客云S1608**
 
